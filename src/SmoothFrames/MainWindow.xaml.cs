@@ -5,34 +5,27 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Threading;
 
 namespace SmoothFrames;
 
 public partial class MainWindow : Window
 {
     private readonly ObservableCollection<GameEntry> _games = new();
-    private readonly DispatcherTimer _refreshTimer = new() { Interval = TimeSpan.FromSeconds(5) };
     private string? _rtssDirectory;
 
     public MainWindow()
     {
         InitializeComponent();
         GamePicker.ItemsSource = _games;
-        _refreshTimer.Tick += (_, _) => RefreshGames();
     }
 
     private void Window_Loaded(object sender, RoutedEventArgs e)
     {
         RefreshGames();
         RefreshRtssStatus();
-        _refreshTimer.Start();
         UpdateFrameInterval();
     }
-
-    private void Window_Closed(object? sender, EventArgs e) => _refreshTimer.Stop();
 
     private void RefreshGames_Click(object sender, RoutedEventArgs e) => RefreshGames();
 
@@ -86,7 +79,6 @@ public partial class MainWindow : Window
         var installed = _rtssDirectory is not null;
         var running = installed && RtssLocator.IsRunning();
 
-        RtssStatusLabel.Text = running ? "RTSS is running" : installed ? "RTSS is installed" : "RTSS not found";
         RtssStatusText.Text = running ? "RTSS ready" : installed ? "Start RTSS" : "RTSS not found";
         RtssIndicator.Fill = new SolidColorBrush((Color)ColorConverter.ConvertFromString(
             running ? "#8AE7CF" : installed ? "#F5BD69" : "#F08C91"));
@@ -220,7 +212,4 @@ public partial class MainWindow : Window
         return $"Could not update RTSS: {message}";
     }
 
-    private void Minimize_Click(object sender, RoutedEventArgs e) => WindowState = WindowState.Minimized;
-    private void Maximize_Click(object sender, RoutedEventArgs e) => WindowState = WindowState == WindowState.Maximized ? WindowState.Normal : WindowState.Maximized;
-    private void Close_Click(object sender, RoutedEventArgs e) => Close();
 }
