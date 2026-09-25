@@ -1,0 +1,216 @@
+<Window x:Class="SmoothFrames.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:shell="clr-namespace:System.Windows.Shell;assembly=PresentationFramework"
+        Title="SmoothFrames" Width="1120" Height="780" MinWidth="940" MinHeight="680"
+        WindowStyle="None" ResizeMode="CanResize" Background="#0D1320" Foreground="#F1F5FF"
+        FontFamily="Segoe UI" Loaded="Window_Loaded" Closed="Window_Closed">
+    <shell:WindowChrome.WindowChrome>
+        <shell:WindowChrome CaptionHeight="46" ResizeBorderThickness="6" CornerRadius="0" GlassFrameThickness="0" UseAeroCaptionButtons="False" />
+    </shell:WindowChrome.WindowChrome>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="46" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <Grid Grid.Row="0" Background="#111A2A">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="20,0,0,0">
+                <Border Width="24" Height="24" CornerRadius="8" Background="#3266A1" Margin="0,0,10,0">
+                    <TextBlock Text="✦" Foreground="#B8E4FF" FontSize="14" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Border>
+                <TextBlock Text="SmoothFrames" FontSize="14" FontWeight="SemiBold" VerticalAlignment="Center" />
+                <TextBlock Text="  /  frame pacing studio" FontSize="12" Foreground="{StaticResource Muted}" VerticalAlignment="Center" />
+            </StackPanel>
+            <StackPanel Grid.Column="1" Orientation="Horizontal" shell:WindowChrome.IsHitTestVisibleInChrome="True">
+                <Button Content="—" Width="44" Height="46" Background="Transparent" Foreground="#AEBBD0" BorderThickness="0" Click="Minimize_Click" />
+                <Button Content="□" Width="44" Height="46" Background="Transparent" Foreground="#AEBBD0" BorderThickness="0" Click="Maximize_Click" />
+                <Button Content="×" Width="48" Height="46" Background="Transparent" Foreground="#AEBBD0" BorderThickness="0" Click="Close_Click" />
+            </StackPanel>
+        </Grid>
+
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="246" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Border Grid.Column="0" Background="#111A2A" BorderBrush="#253249" BorderThickness="0,0,1,0" Padding="20,22">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <StackPanel Orientation="Horizontal" Margin="0,2,0,30">
+                        <Border Width="48" Height="48" CornerRadius="16" Background="#1B2C49" BorderBrush="#375B8D" BorderThickness="1">
+                            <Grid>
+                                <Path Data="M 12,5 C 3,1 5,16 12,18 C 19,20 20,5 12,5 M 23,6 C 17,2 17,15 23,18" Stroke="#79C4FF" StrokeThickness="2.2" Fill="#395F91" Stretch="Uniform" Margin="7" />
+                                <TextBlock Text="✦" Foreground="#D6F1FF" FontSize="11" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,5,5,0" />
+                            </Grid>
+                        </Border>
+                        <StackPanel VerticalAlignment="Center" Margin="12,0,0,0">
+                            <TextBlock Text="SMOOTH" FontSize="14" FontWeight="Bold" />
+                            <TextBlock Text="FRAMES" FontSize="11" Foreground="{StaticResource Blue}" FontWeight="SemiBold" />
+                        </StackPanel>
+                    </StackPanel>
+                    <StackPanel Grid.Row="1">
+                        <TextBlock Text="WORKSPACE" FontSize="10" Foreground="#6F819D" FontWeight="Bold" Margin="4,0,0,11" />
+                        <Border CornerRadius="11" Background="#1C2A42" Padding="13,11" BorderBrush="#31496C" BorderThickness="1">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="◈" Foreground="{StaticResource Blue}" FontSize="16" Margin="0,0,10,0" />
+                                <TextBlock Text="Limiter" FontSize="13" FontWeight="SemiBold" />
+                                <Border Background="#75BFFF" CornerRadius="5" Padding="6,2" HorizontalAlignment="Right" Margin="48,0,0,0">
+                                    <TextBlock Text="LIVE" Foreground="#102037" FontSize="9" FontWeight="Bold" />
+                                </Border>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                    <Border Grid.Row="3" CornerRadius="15" Background="#172238" BorderBrush="#293B59" BorderThickness="1" Padding="14">
+                        <StackPanel>
+                            <TextBlock Text="KONATA MODE" Foreground="#85C6FF" FontSize="10" FontWeight="Bold" />
+                            <TextBlock Text="Blue skies. Steady frames." FontSize="13" FontWeight="SemiBold" Margin="0,8,0,5" />
+                            <TextBlock Text="A small fan theme for a smoother-feeling game night." FontSize="11" Foreground="{StaticResource Muted}" TextWrapping="Wrap" LineHeight="17" />
+                            <StackPanel Orientation="Horizontal" Margin="0,13,0,0">
+                                <Ellipse Width="7" Height="7" Fill="{StaticResource Mint}" VerticalAlignment="Center" />
+                                <TextBlock x:Name="RtssStatusLabel" Text="Checking RTSS" FontSize="10" Foreground="#9CAFC8" Margin="7,0,0,0" />
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </Border>
+
+            <ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                <StackPanel Margin="34,30,34,26">
+                    <Grid Margin="0,0,0,24">
+                        <StackPanel>
+                            <TextBlock Text="FRAME PACING / DESKTOP" Foreground="#7C91AE" FontSize="10" FontWeight="Bold" />
+                            <TextBlock Text="Keep the rhythm." FontSize="30" FontWeight="Bold" Margin="0,7,0,5" />
+                            <TextBlock Text="Choose a game, set a cap, and let RTSS handle the frame delivery." FontSize="13" Foreground="{StaticResource Muted}" />
+                        </StackPanel>
+                        <Border HorizontalAlignment="Right" VerticalAlignment="Center" CornerRadius="12" Padding="12,9" Background="#172638" BorderBrush="#29405D" BorderThickness="1">
+                            <StackPanel Orientation="Horizontal">
+                                <Ellipse x:Name="RtssIndicator" Width="8" Height="8" Fill="#F5BD69" VerticalAlignment="Center" />
+                                <TextBlock x:Name="RtssStatusText" Text="RTSS status" FontSize="11" Foreground="#D5E2F3" Margin="8,0,0,0" />
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+
+                    <Border Style="{StaticResource Card}" Margin="0,0,0,18">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="1.25*" />
+                                <ColumnDefinition Width="0.75*" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel>
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,15">
+                                    <Border Width="28" Height="28" CornerRadius="9" Background="#24395B" Margin="0,0,10,0">
+                                        <TextBlock Text="01" FontSize="10" FontWeight="Bold" Foreground="#9DD5FF" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                    </Border>
+                                    <StackPanel VerticalAlignment="Center">
+                                        <TextBlock Text="Pick a game" FontSize="17" FontWeight="SemiBold" />
+                                        <TextBlock Text="Select a running game or choose its executable." FontSize="11" Foreground="{StaticResource Muted}" Margin="0,2,0,0" />
+                                    </StackPanel>
+                                </StackPanel>
+                                <ComboBox x:Name="GamePicker" Height="44" IsEditable="False" FontSize="13" Foreground="#EAF2FF" Background="#111827" BorderBrush="#33425B" BorderThickness="1" Padding="10,8" SelectionChanged="GamePicker_SelectionChanged" />
+                                <TextBlock x:Name="SelectedGamePath" Text="No game selected yet" Foreground="#8495AE" FontSize="10" TextTrimming="CharacterEllipsis" Margin="2,8,0,0" />
+                            </StackPanel>
+                            <StackPanel Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Center" Width="150">
+                                <Button Content="↻  Refresh games" Style="{StaticResource QuietButton}" Click="RefreshGames_Click" Margin="0,0,0,9" />
+                                <Button Content="＋  Browse for game" Style="{StaticResource QuietButton}" Click="BrowseGame_Click" />
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+
+                    <Grid Margin="0,0,0,18">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="1.12*" />
+                            <ColumnDefinition Width="0.88*" />
+                        </Grid.ColumnDefinitions>
+                        <Border Style="{StaticResource Card}" Margin="0,0,9,0">
+                            <StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <Border Width="28" Height="28" CornerRadius="9" Background="#30284D" Margin="0,0,10,0">
+                                        <TextBlock Text="02" FontSize="10" FontWeight="Bold" Foreground="#C7B8FF" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                    </Border>
+                                    <StackPanel VerticalAlignment="Center">
+                                        <TextBlock Text="Set your limit" FontSize="17" FontWeight="SemiBold" />
+                                        <TextBlock Text="A target your PC can hold steadily." FontSize="11" Foreground="{StaticResource Muted}" Margin="0,2,0,0" />
+                                    </StackPanel>
+                                </StackPanel>
+                                <Grid Margin="0,22,0,12">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="120" />
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel VerticalAlignment="Center">
+                                        <TextBlock Text="TARGET FPS" FontSize="10" Foreground="#8799B2" FontWeight="Bold" />
+                                        <TextBlock Text="Pick a stable cap" FontSize="12" Foreground="#C5D0E0" Margin="0,5,0,0" />
+                                    </StackPanel>
+                                    <Border Grid.Column="1" CornerRadius="12" Background="#111827" BorderBrush="#35425B" BorderThickness="1" Padding="13,5">
+                                        <DockPanel>
+                                            <TextBlock Text="FPS" Foreground="#8799B2" FontSize="10" VerticalAlignment="Center" DockPanel.Dock="Right" Margin="9,0,0,0" />
+                                            <TextBox x:Name="FpsInput" Text="120" Background="Transparent" BorderThickness="0" Foreground="#F2F5FF" FontSize="21" FontWeight="Bold" VerticalContentAlignment="Center" TextChanged="FpsInput_TextChanged" />
+                                        </DockPanel>
+                                    </Border>
+                                </Grid>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                                    <Button Content="60" Tag="60" Style="{StaticResource PresetButton}" Click="Preset_Click" Margin="0,0,8,0" />
+                                    <Button Content="120" Tag="120" Style="{StaticResource PresetButton}" Click="Preset_Click" Margin="0,0,8,0" />
+                                    <Button Content="144" Tag="144" Style="{StaticResource PresetButton}" Click="Preset_Click" Margin="0,0,8,0" />
+                                    <Button Content="240" Tag="240" Style="{StaticResource PresetButton}" Click="Preset_Click" />
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
+                        <Border Grid.Column="1" Style="{StaticResource Card}" Margin="9,0,0,0" Background="#19263A">
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock Text="TARGET FRAME INTERVAL" FontSize="10" Foreground="#8CA4C1" FontWeight="Bold" />
+                                <StackPanel Orientation="Horizontal" Margin="0,8,0,5">
+                                    <TextBlock x:Name="FrameIntervalText" Text="8.33" FontSize="34" FontWeight="Bold" Foreground="#9ED8FF" />
+                                    <TextBlock Text="ms" FontSize="14" Foreground="#A7B4C8" VerticalAlignment="Bottom" Margin="8,0,0,5" />
+                                </StackPanel>
+                                <TextBlock Text="per frame at your selected cap" FontSize="11" Foreground="{StaticResource Muted}" />
+                                <Border Height="1" Background="#334560" Margin="0,16,0,12" />
+                                <StackPanel Orientation="Horizontal">
+                                    <Ellipse Width="6" Height="6" Fill="{StaticResource Violet}" VerticalAlignment="Center" />
+                                    <TextBlock Text="Target guide, not live game telemetry" FontSize="10" Foreground="#A8B6CC" Margin="7,0,0,0" />
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+
+                    <Grid Margin="0,0,0,18">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <Border Style="{StaticResource Card}" Padding="18,15" Margin="0,0,9,0">
+                            <StackPanel>
+                                <TextBlock Text="SmoothFrames updates the game's RTSS profile and asks RTSS to reload active profiles." FontSize="12" TextWrapping="Wrap" />
+                                <TextBlock Text="The cap works only while RTSS is installed and running. SmoothFrames itself does not inject code into games." FontSize="10" Foreground="{StaticResource Muted}" TextWrapping="Wrap" Margin="0,7,0,0" />
+                            </StackPanel>
+                        </Border>
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                            <Button Content="Remove cap" Style="{StaticResource QuietButton}" Click="RemoveLimit_Click" Margin="0,0,9,0" />
+                            <Button Content="Apply limit  →" Style="{StaticResource PrimaryButton}" Click="ApplyLimit_Click" />
+                        </StackPanel>
+                    </Grid>
+
+                    <Border Background="#191F31" BorderBrush="#473F70" BorderThickness="1" CornerRadius="15" Padding="16,13">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="✦" FontSize="16" Foreground="#C9B9FF" Margin="0,0,11,0" VerticalAlignment="Top" />
+                            <StackPanel>
+                                <TextBlock Text="A smoother-feeling cap starts with a stable target." FontSize="12" FontWeight="SemiBold" />
+                                <TextBlock Text="Try a limit a little below your usual FPS ceiling. Frame pacing results vary by game, GPU load, sync mode, and RTSS compatibility." FontSize="10" Foreground="#A8B4C8" TextWrapping="Wrap" Margin="0,5,0,0" />
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+                    <TextBlock x:Name="StatusText" Text="Ready. Select a game to configure its RTSS profile." FontSize="11" Foreground="#A7B7CC" Margin="3,15,0,0" TextWrapping="Wrap" />
+                </StackPanel>
+            </ScrollViewer>
+        </Grid>
+    </Grid>
+</Window>
