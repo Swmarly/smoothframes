@@ -193,7 +193,7 @@ public partial class MainWindow : Window
                 using var client = new RtssProfileClient(directory);
                 client.ClearLimit(game.Executable);
             });
-            StatusText.Text = $"Cleared the per-game cap for {game.Executable}. Any global RTSS cap still applies.";
+            StatusText.Text = $"Set {game.Executable}'s per-game cap to 0. Check RTSS global settings if you use a global cap.";
             RefreshRtssStatus();
         }
         catch (Exception ex)

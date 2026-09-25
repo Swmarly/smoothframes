@@ -54,6 +54,8 @@ SmoothFrames itself does not inject code into a game. RTSS uses its own integrat
 
 The first version keeps the scope focused on reliable per-game RTSS profile control.
 
+Using **Remove cap** sets that game's `FramerateLimit` profile value to `0`. RTSS applies its own profile and global-setting rules afterward.
+
 ## License and naming
 
 The SmoothFrames source is available under the [MIT License](LICENSE).

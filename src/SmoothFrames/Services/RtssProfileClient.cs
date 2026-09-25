@@ -68,7 +68,7 @@ public sealed class RtssProfileClient : IDisposable
     public void ClearLimit(string executable)
     {
         ValidateExecutable(executable);
-        // RTSS treats a zero per-profile cap as no per-profile limit.
+        // Reset only this profile property's value; preserve any other RTSS profile settings.
         SetLimit(executable, 0);
     }
 
