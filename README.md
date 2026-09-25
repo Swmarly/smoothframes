@@ -1,63 +1,48 @@
 # SmoothFrames
 
-**An open-source, Konata Izumi-themed frame limiter control panel for Windows.**
+A small, open-source Windows frame limiter with a restrained blue-and-lavender theme inspired by Konata Izumi. Native WPF interface, built-in C++ engine, no RTSS, browser runtime, service, or separate .NET installation.
 
-SmoothFrames gives you a small, friendly way to set per-game FPS caps through RivaTuner Statistics Server (RTSS). Choose a running game or browse to its `.exe`, select a cap, and apply it while the game is open.
+## Use
 
-> SmoothFrames controls RTSS. RTSS is the component that applies the limit to games, so RTSS must be installed and running. SmoothFrames does not claim to replace RTSS's limiter engine.
+1. Extract the release ZIP and open **SmoothFrames.exe**.
+2. Start your game and choose it from the list. Use **Refresh** after starting a game.
+3. Choose an FPS cap (15–1000), then **Apply cap**. The status changes from **Attached · waiting for frames** to **FPS active** only when the engine sees presentation calls.
+4. **Pause** removes the cap and keeps your saved value. Minimize to the notification area to keep limiting; close/Exit clears the cap.
 
-## What it does
+**Browse** lets you save a cap for a game that is not running yet. SmoothFrames remembers caps by full executable path. It does not launch or automatically attach to games. One game can be limited at a time; attaching to another clears the previous cap. Multiple instances of the same game are distinguished by process ID.
 
-- Finds games with visible windows and lets you choose an executable manually.
-- Applies or clears an RTSS per-application `FramerateLimit` profile value.
-- Asks RTSS to reload active profiles after a change.
-- Shows the target frame interval (`1000 ÷ FPS`) as a pacing guide. This is not live game telemetry.
-- Uses an original blue-haired, starry interface theme inspired by Konata Izumi and *Lucky Star*.
+Everything required at runtime is embedded in the app, including both x86 and x64 engines. They are extracted to `%LocalAppData%\SmoothFrames\engine` when needed, with a content check before reuse. Settings live in `%LocalAppData%\SmoothFrames\profiles.json`. No downloads or installation prompts occur at runtime.
 
-## Requirements
+## Compatibility and measurements
 
-- Windows 10 or 11, 64-bit
-- RivaTuner Statistics Server (RTSS), installed and running
-- SmoothFrames build for Windows x64
+- Windows 10 1809+ or Windows 11 **x64**, with x86/x64 games.
+- Built-in hooks for **DXGI Present/Present1** (Direct3D 10/11, and compatible Direct3D 12 paths), **Direct3D 9/9Ex device Present**, and **OpenGL GDI SwapBuffers**.
+- **Vulkan, DirectDraw, ARM64, D3D9 additional swapchains, and alternative OpenGL swap entry points are not supported.** DX12 and individual game/overlay combinations still need real-game validation. This is an initial native engine, not a claim of compatibility with every game supported by mature limiters.
+- The engine chooses the first active presentation stream and ignores secondary swapchains until that stream has been idle for a second. Multi-window renderers may need further compatibility work.
+- Nonblocking/test presents are left untouched. V-sync and game presentation flags are preserved.
+- FPS, average and P99 are measured **CPU-side intervals between intercepted presentation calls**, including limiter wait. They are not GPU render duration, display scanout timing, input latency, or proof of perfectly smooth displayed frames.
+- The graph shows 250 ms sampled means over up to 45 seconds; P99 uses up to 2048 recent individual intervals. A mean graph can hide single-frame spikes; use P99 alongside it.
 
-SmoothFrames uses the RTSS profile interface exposed by `RTSSHooks64.dll`; it does not redistribute RTSS files. If RTSS runs with elevated permissions and SmoothFrames cannot save a profile, run SmoothFrames with the same permissions.
+Use the engine with games that permit graphics hooks. Anti-cheat or protected processes may reject attachment; SmoothFrames does not bypass protections or automatically elevate. If a game runs as administrator, matching permissions may be necessary. **Attached · waiting for frames** means support has not yet been confirmed for that renderer; it must not be read as an active cap.
+
+The cap resets on clean exit. If the UI hangs or crashes, the engine stops pacing after its heartbeat is stale for 2.5 seconds. Hook code stays resident but inactive until the game exits, avoiding unsafe DLL unloading. A cap cannot make an overloaded game reach its target or fix all sources of stutter. Avoid stacking multiple limiters on the same game.
 
 ## Build
 
-Install the .NET 8 SDK, then run:
+Install the .NET 8 SDK, Visual Studio 2022 or newer C++ desktop build tools (Windows SDK and CMake), Git and PowerShell 7. On Windows:
 
 ```powershell
-dotnet build .\src\SmoothFrames\SmoothFrames.csproj -c Release
+pwsh ./scripts/build.ps1
 ```
 
-To make a self-contained x64 publish:
+This builds and tests both native architectures, embeds their binaries, publishes a self-contained executable, verifies extraction from that executable, and produces `artifacts/SmoothFrames-win-x64.zip`. Native code statically links its C runtime and MinHook, so no separate VC++ runtime installer is needed. MinHook is fetched **at build time only**, pinned to commit `c3fcafdc10146beb5919319d0683e44e3c30d537` (v1.3.4).
 
-```powershell
-dotnet publish .\src\SmoothFrames\SmoothFrames.csproj -c Release -r win-x64 --self-contained true `
-  -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o .\artifacts\publish
-```
+The app project deliberately fails a direct build when native artifacts are absent. `-SkipTests` is available for local builds without a graphics-capable desktop; CI and releases always run the tests.
 
-Tagged releases are built and attached automatically by GitHub Actions.
+## Validation
 
-## Limits and safety
+Windows CI builds x64 and x86 and runs an actual Direct3D 11 fixture for each: process identity checking, helper injection, shared-memory handshake, 30/60 FPS pacing, pause, stale-heartbeat handling and recovery. It also verifies the engines embedded in the published executable. This does not replace testing D3D9, OpenGL, DX12, overlays, fullscreen transitions, or anti-cheat policies in actual games.
 
-A frame cap can help reduce unnecessary rendering and make pacing more consistent when the game can sustain the chosen target. It cannot guarantee perfectly flat frametimes, lower latency, or better performance in every game. Results depend on the game, graphics API, GPU load, sync settings, and RTSS compatibility.
+## License
 
-SmoothFrames itself does not inject code into a game. RTSS uses its own integration to apply limits; check the game's anti-cheat rules before using RTSS with protected online games. SmoothFrames does not bypass anti-cheat protections.
-
-## Roadmap
-
-- Live frametime capture and graphing
-- Saved named profiles and per-game quick presets
-- Optional tray controls and global hotkeys
-- More themes and localization
-
-The first version keeps the scope focused on reliable per-game RTSS profile control.
-
-Using **Remove cap** sets that game's `FramerateLimit` profile value to `0`. RTSS applies its own profile and global-setting rules afterward.
-
-## License and naming
-
-The SmoothFrames source is available under the [MIT License](LICENSE).
-
-SmoothFrames is an independent fan project and is not affiliated with RTSS, Valve, or the creators of *Lucky Star*. Konata Izumi and *Lucky Star* are the property of their respective rights holders. The interface uses an original theme and contains no official character artwork.
+SmoothFrames is MIT-licensed. The bundled MinHook component uses the BSD 2-Clause license, included in each package. This independent fan project is not affiliated with RTSS, Valve, or the creators of *Lucky Star*. It contains no official character artwork.

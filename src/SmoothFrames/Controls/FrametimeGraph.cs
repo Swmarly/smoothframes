@@ -65,23 +65,28 @@ public sealed class FrametimeGraph : FrameworkElement
             drawingContext.DrawLine(GridPen, new Point(x, 0), new Point(x, height));
         }
 
-        var scaleMs = Math.Max(33.33, _targetIntervalMs * 2);
+        var scaleMs = Math.Max(Math.Max(20, _targetIntervalMs * 1.5), _samples.Count == 0 ? 0 : _samples.Max() * 1.1);
         var targetY = height - Math.Min(_targetIntervalMs, scaleMs) / scaleMs * height;
         drawingContext.DrawLine(TargetPen, new Point(0, targetY), new Point(width, targetY));
+
+        var label = new FormattedText($"{scaleMs:0.0} ms", System.Globalization.CultureInfo.CurrentCulture,
+            FlowDirection.LeftToRight, new Typeface("Segoe UI"), 10, Brushes.Gray, VisualTreeHelper.GetDpi(this).PixelsPerDip);
+        drawingContext.DrawText(label, new Point(7, 5));
 
         if (_samples.Count < 2)
             return;
 
         var values = _samples.ToArray();
-        var stepX = width / (values.Length - 1d);
+        var stepX = width / (SampleLimit - 1d);
+        var startX = width - stepX * (values.Length - 1);
         var trace = new StreamGeometry();
         using (var context = trace.Open())
         {
             var firstY = YFor(values[0], scaleMs, height);
-            context.BeginFigure(new Point(0, height), true, true);
-            context.LineTo(new Point(0, firstY), true, false);
+            context.BeginFigure(new Point(startX, height), true, true);
+            context.LineTo(new Point(startX, firstY), true, false);
             for (var i = 1; i < values.Length; i++)
-                context.LineTo(new Point(i * stepX, YFor(values[i], scaleMs, height)), true, false);
+                context.LineTo(new Point(startX + i * stepX, YFor(values[i], scaleMs, height)), true, false);
             context.LineTo(new Point(width, height), true, false);
         }
         trace.Freeze();
@@ -90,9 +95,9 @@ public sealed class FrametimeGraph : FrameworkElement
         var line = new StreamGeometry();
         using (var context = line.Open())
         {
-            context.BeginFigure(new Point(0, YFor(values[0], scaleMs, height)), false, false);
+            context.BeginFigure(new Point(startX, YFor(values[0], scaleMs, height)), false, false);
             for (var i = 1; i < values.Length; i++)
-                context.LineTo(new Point(i * stepX, YFor(values[i], scaleMs, height)), true, false);
+                context.LineTo(new Point(startX + i * stepX, YFor(values[i], scaleMs, height)), true, false);
         }
         line.Freeze();
         drawingContext.DrawGeometry(null, TracePen, line);
