@@ -13,7 +13,10 @@ namespace SmoothFrames;
 public partial class MainWindow : Window
 {
     private readonly ObservableCollection<GameEntry> _games = new();
-    private readonly DispatcherTimer _telemetryTimer = new() { Interval = TimeSpan.FromMilliseconds(50), Priority = DispatcherPriority.Background };
+    private readonly DispatcherTimer _telemetryTimer = new(DispatcherPriority.Background)
+    {
+        Interval = TimeSpan.FromMilliseconds(50)
+    };
     private string? _rtssDirectory;
     private bool _isRtssRunning;
     private RtssTelemetryReader? _telemetryReader;
@@ -313,7 +316,7 @@ public partial class MainWindow : Window
     private static string ExplainFailure(Exception exception)
     {
         var message = exception is System.Reflection.TargetInvocationException { InnerException: not null } invocation
-            ? invocation.InnerException.Message
+            ? invocation.InnerException!.Message
             : exception.Message;
         return $"Could not update RTSS: {message}";
     }
