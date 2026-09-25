@@ -6,13 +6,21 @@ using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using System.Windows.Threading;
 
 namespace SmoothFrames;
 
 public partial class MainWindow : Window
 {
     private readonly ObservableCollection<GameEntry> _games = new();
+    private readonly DispatcherTimer _telemetryTimer = new() { Interval = TimeSpan.FromMilliseconds(50), Priority = DispatcherPriority.Background };
     private string? _rtssDirectory;
+    private bool _isRtssRunning;
+    private RtssTelemetryReader? _telemetryReader;
+    private DateTime _nextInstallProbeUtc = DateTime.MinValue;
+    private DateTime _nextRtssCheckUtc = DateTime.MinValue;
+    private DateTime _lastSampleUtc = DateTime.MinValue;
+    private bool _hasTelemetrySample;
 
     public MainWindow()
     {
@@ -25,6 +33,15 @@ public partial class MainWindow : Window
         RefreshGames();
         RefreshRtssStatus();
         UpdateFrameInterval();
+        _telemetryTimer.Tick += TelemetryTimer_Tick;
+        _telemetryTimer.Start();
+    }
+
+    private void Window_Closed(object? sender, EventArgs e)
+    {
+        _telemetryTimer.Stop();
+        _telemetryReader?.Dispose();
+        _telemetryReader = null;
     }
 
     private void RefreshGames_Click(object sender, RoutedEventArgs e) => RefreshGames();
@@ -73,23 +90,49 @@ public partial class MainWindow : Window
         RefreshRtssStatus();
     }
 
-    private void RefreshRtssStatus()
+    private void RefreshRtssStatus(bool forceDiscovery = true)
     {
-        _rtssDirectory = RtssLocator.FindInstallDirectory();
-        var installed = _rtssDirectory is not null;
-        var running = installed && RtssLocator.IsRunning();
+        var now = DateTime.UtcNow;
+        if (forceDiscovery || now >= _nextInstallProbeUtc)
+        {
+            _rtssDirectory = RtssLocator.FindInstallDirectory();
+            _nextInstallProbeUtc = now.AddSeconds(30);
+        }
 
-        RtssStatusText.Text = running ? "RTSS ready" : installed ? "Start RTSS" : "RTSS not found";
+        var installed = _rtssDirectory is not null;
+        _isRtssRunning = installed && RtssLocator.IsRunning();
+
+        RtssStatusText.Text = _isRtssRunning ? "RTSS ready" : installed ? "Start RTSS" : "RTSS not found";
         RtssIndicator.Fill = new SolidColorBrush((Color)ColorConverter.ConvertFromString(
-            running ? "#8AE7CF" : installed ? "#F5BD69" : "#F08C91"));
+            _isRtssRunning ? "#8AE7CF" : installed ? "#F5BD69" : "#F08C91"));
     }
 
     private void GamePicker_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         var game = GamePicker.SelectedItem as GameEntry;
-        SelectedGamePath.Text = game?.FullPath ?? "No game selected yet";
-        if (game is not null)
-            StatusText.Text = $"Selected {game.DisplayName}. The per-game cap will be stored for {game.Executable}.";
+        if (SelectedGameStatus is not null)
+        {
+            SelectedGameStatus.Text = game is null
+                ? "Choose a running game or browse to its executable."
+                : $"{game.DisplayName}  ·  {(game.ProcessId is null ? "waiting for process" : "running")}";
+            SelectedGameStatus.ToolTip = game?.FullPath;
+        }
+
+        if (FrameGraph is not null)
+            FrameGraph.ClearSamples();
+        _hasTelemetrySample = false;
+        _lastSampleUtc = DateTime.MinValue;
+        if (LiveMetricsText is not null)
+            LiveMetricsText.Text = "FPS —   |   Time —   |   API —";
+        if (EmptyGraphLabel is not null)
+        {
+            EmptyGraphLabel.Text = game is null
+                ? "Select a game to monitor frametimes"
+                : "Start the selected game with RTSS enabled";
+            EmptyGraphLabel.Visibility = Visibility.Visible;
+        }
+        if (StatusText is not null)
+            StatusText.Text = game is null ? "Ready" : $"Ready · cap applies to {game.Executable}";
     }
 
     private void BrowseGame_Click(object sender, RoutedEventArgs e)
@@ -128,13 +171,76 @@ public partial class MainWindow : Window
 
     private void UpdateFrameInterval()
     {
-        if (FrameIntervalText is null)
+        if (TargetText is null)
             return;
 
         if (int.TryParse(FpsInput?.Text, out var fps) && fps > 0)
-            FrameIntervalText.Text = (1000d / fps).ToString("0.00");
+        {
+            var intervalMs = 1000d / fps;
+            TargetText.Text = $"Target {intervalMs:0.00} ms";
+            if (FrameGraph is not null)
+                FrameGraph.TargetIntervalMs = intervalMs;
+        }
         else
-            FrameIntervalText.Text = "—";
+        {
+            TargetText.Text = "Target —";
+            if (FrameGraph is not null)
+                FrameGraph.TargetIntervalMs = 8.33;
+        }
+    }
+
+    private void TelemetryTimer_Tick(object? sender, EventArgs e)
+    {
+        var now = DateTime.UtcNow;
+        if (now >= _nextRtssCheckUtc)
+        {
+            _nextRtssCheckUtc = now.AddSeconds(2);
+            RefreshRtssStatus(forceDiscovery: false);
+            if (!_isRtssRunning)
+            {
+                _telemetryReader?.Dispose();
+                _telemetryReader = null;
+            }
+            else
+            {
+                if (_telemetryReader is not null && !_telemetryReader.IsMappingValid)
+                {
+                    _telemetryReader.Dispose();
+                    _telemetryReader = null;
+                }
+                _telemetryReader ??= RtssTelemetryReader.TryConnect();
+            }
+        }
+
+        var game = GamePicker.SelectedItem as GameEntry;
+        if (game is not null && _telemetryReader?.TryRead(game.ProcessId, game.Executable, out var sample) == true)
+        {
+            _lastSampleUtc = now;
+            _hasTelemetrySample = true;
+            LiveMetricsText.Text = $"FPS {sample.FramesPerSecond:0}   |   Time {sample.FrametimeMs:0.00} ms   |   API {sample.Api}";
+            FrameGraph.AddSample(sample.FrametimeMs);
+            EmptyGraphLabel.Visibility = Visibility.Collapsed;
+            return;
+        }
+
+        if (_hasTelemetrySample && now - _lastSampleUtc > TimeSpan.FromSeconds(1))
+        {
+            _hasTelemetrySample = false;
+            FrameGraph.ClearSamples();
+        }
+
+        if (!_hasTelemetrySample)
+        {
+            LiveMetricsText.Text = _telemetryReader is null
+                ? "FPS —   |   Time —   |   RTSS offline"
+                : "FPS —   |   Time —   |   Waiting for frames";
+            EmptyGraphLabel.Text = game is null
+                ? "Select a game to monitor frametimes"
+                : _telemetryReader is null
+                    ? "Start RTSS to view frametimes"
+                    : "Start the selected game with RTSS enabled";
+            EmptyGraphLabel.Visibility = Visibility.Visible;
+        }
     }
 
     private async void ApplyLimit_Click(object sender, RoutedEventArgs e)
@@ -199,7 +305,7 @@ public partial class MainWindow : Window
         RefreshRtssStatus();
         if (_rtssDirectory is null)
             throw new InvalidOperationException("RTSS was not found. Install RivaTuner Statistics Server, then click Refresh games.");
-        if (!RtssLocator.IsRunning())
+        if (!_isRtssRunning)
             throw new InvalidOperationException("RTSS is installed but not running. Start RivaTuner Statistics Server and try again.");
         return _rtssDirectory;
     }

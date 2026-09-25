@@ -41,13 +41,20 @@ public static class RtssLocator
 
     public static bool IsRunning()
     {
+        Process[] processes = Array.Empty<Process>();
         try
         {
-            return Process.GetProcessesByName("RTSS").Any();
+            processes = Process.GetProcessesByName("RTSS");
+            return processes.Length > 0;
         }
         catch
         {
             return false;
+        }
+        finally
+        {
+            foreach (var process in processes)
+                process.Dispose();
         }
     }
 }

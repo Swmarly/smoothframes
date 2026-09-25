@@ -1,113 +1,102 @@
  <Window x:Class="SmoothFrames.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="SmoothFrames" Width="740" Height="430" MinWidth="680" MinHeight="410"
+        xmlns:controls="clr-namespace:SmoothFrames.Controls"
+        Title="SmoothFrames" Width="650" Height="420" MinWidth="610" MinHeight="400"
         WindowStartupLocation="CenterScreen" WindowStyle="SingleBorderWindow"
-        ResizeMode="CanResize" Background="{StaticResource Canvas}" Foreground="{StaticResource Ink}"
-        FontFamily="Segoe UI" Loaded="Window_Loaded">
-    <Grid Margin="24,20,24,18">
+        ResizeMode="CanResize" Background="{StaticResource Canvas}"
+        FontFamily="Segoe UI" Loaded="Window_Loaded" Closed="Window_Closed">
+    <Grid Margin="17,14,17,13">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
-            <RowDefinition Height="20" />
+            <RowDefinition Height="9" />
             <RowDefinition Height="Auto" />
-            <RowDefinition Height="18" />
+            <RowDefinition Height="8" />
             <RowDefinition Height="Auto" />
-            <RowDefinition Height="18" />
+            <RowDefinition Height="5" />
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="7" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="5" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="8" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
         <Grid Grid.Row="0">
             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                <Border Width="30" Height="30" CornerRadius="9" Background="{StaticResource BlueWash}" Margin="0,0,11,0">
-                    <TextBlock Text="K" Foreground="{StaticResource Blue}" FontSize="15" FontWeight="Bold"
+                <Border Width="25" Height="25" CornerRadius="7" Background="#26394A" Margin="0,0,9,0">
+                    <TextBlock Text="K" Foreground="{StaticResource Blue}" FontSize="13" FontWeight="Bold"
                                HorizontalAlignment="Center" VerticalAlignment="Center" />
                 </Border>
-                <StackPanel VerticalAlignment="Center">
-                    <TextBlock Text="SmoothFrames" FontSize="19" FontWeight="SemiBold" />
-                    <TextBlock Text="Per-game FPS cap" FontSize="11" Foreground="{StaticResource Muted}" Margin="0,1,0,0" />
-                </StackPanel>
+                <TextBlock Text="SmoothFrames" FontSize="15" FontWeight="SemiBold" VerticalAlignment="Center" />
             </StackPanel>
-            <Border HorizontalAlignment="Right" VerticalAlignment="Center" CornerRadius="12"
-                    Background="White" BorderBrush="{StaticResource Line}" BorderThickness="1" Padding="10,7">
-                <StackPanel Orientation="Horizontal">
-                    <Ellipse x:Name="RtssIndicator" Width="7" Height="7" Fill="#E2A848" VerticalAlignment="Center" />
-                    <TextBlock x:Name="RtssStatusText" Text="Checking RTSS" FontSize="11"
-                               Foreground="{StaticResource Muted}" Margin="7,0,0,0" VerticalAlignment="Center" />
-                </StackPanel>
-            </Border>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                <Ellipse x:Name="RtssIndicator" Width="7" Height="7" Fill="#DDA94F" VerticalAlignment="Center" />
+                <TextBlock x:Name="RtssStatusText" Text="Checking RTSS" FontSize="10"
+                           Foreground="{StaticResource Muted}" Margin="6,0,0,0" VerticalAlignment="Center" />
+            </StackPanel>
         </Grid>
 
-        <StackPanel Grid.Row="2">
-            <TextBlock Text="GAME" FontSize="10" FontWeight="SemiBold" Foreground="{StaticResource Muted}" Margin="1,0,0,7" />
+        <Border Grid.Row="2" Background="{StaticResource Surface}" BorderBrush="{StaticResource Line}"
+                BorderThickness="1" CornerRadius="8" Padding="7">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="32" />
+                    <ColumnDefinition Width="68" />
+                    <ColumnDefinition Width="85" />
+                    <ColumnDefinition Width="74" />
+                    <ColumnDefinition Width="68" />
                 </Grid.ColumnDefinitions>
-                <ComboBox x:Name="GamePicker" Height="40" IsEditable="False" FontSize="13"
-                          Foreground="{StaticResource Ink}" Background="White"
-                          BorderBrush="{StaticResource Line}" BorderThickness="1" Padding="10,7"
-                          SelectionChanged="GamePicker_SelectionChanged" />
-                <Button Grid.Column="1" Content="Refresh" Style="{StaticResource QuietButton}"
-                        Click="RefreshGames_Click" Margin="8,0,0,0" />
-                <Button Grid.Column="2" Content="Browse…" Style="{StaticResource QuietButton}"
-                        Click="BrowseGame_Click" Margin="8,0,0,0" />
-            </Grid>
-            <TextBlock x:Name="SelectedGamePath" Text="Select a running game or browse to its .exe"
-                       FontSize="10" Foreground="{StaticResource Muted}" TextTrimming="CharacterEllipsis"
-                       Margin="2,6,0,0" />
-        </StackPanel>
-
-        <Border Grid.Row="4" Background="White" BorderBrush="{StaticResource Line}" BorderThickness="1"
-                CornerRadius="12" Padding="16,14">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="Auto" />
-                </Grid.ColumnDefinitions>
-                <StackPanel VerticalAlignment="Center">
-                    <TextBlock Text="FPS cap" FontSize="14" FontWeight="SemiBold" />
-                    <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
-                        <TextBlock Text="Target interval" FontSize="11" Foreground="{StaticResource Muted}" VerticalAlignment="Center" />
-                        <TextBlock x:Name="FrameIntervalText" Text="8.33" FontSize="12" FontWeight="SemiBold"
-                                   Foreground="{StaticResource Blue}" Margin="8,0,3,0" VerticalAlignment="Center" />
-                        <TextBlock Text="ms / frame" FontSize="11" Foreground="{StaticResource Muted}" VerticalAlignment="Center" />
-                    </StackPanel>
-                </StackPanel>
-                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                    <Border Background="{StaticResource FieldBg}" BorderBrush="{StaticResource Line}" BorderThickness="1"
-                            CornerRadius="8" Padding="10,3" Margin="0,0,12,0">
-                        <DockPanel>
-                            <TextBlock Text="FPS" Foreground="{StaticResource Muted}" FontSize="10"
-                                       VerticalAlignment="Center" DockPanel.Dock="Right" Margin="8,0,0,0" />
-                            <TextBox x:Name="FpsInput" Text="120" Width="48" Background="Transparent"
-                                     BorderThickness="0" Foreground="{StaticResource Ink}" FontSize="17"
-                                     FontWeight="SemiBold" VerticalContentAlignment="Center"
-                                     TextChanged="FpsInput_TextChanged" />
-                        </DockPanel>
-                    </Border>
-                    <Button Content="60" Tag="60" Style="{StaticResource PresetButton}" Click="Preset_Click" Margin="0,0,5,0" />
-                    <Button Content="120" Tag="120" Style="{StaticResource PresetButton}" Click="Preset_Click" Margin="0,0,5,0" />
-                    <Button Content="144" Tag="144" Style="{StaticResource PresetButton}" Click="Preset_Click" Margin="0,0,5,0" />
-                    <Button Content="240" Tag="240" Style="{StaticResource PresetButton}" Click="Preset_Click" />
-                </StackPanel>
+                <ComboBox x:Name="GamePicker" Height="34" IsEditable="False" FontSize="12"
+                          Foreground="{StaticResource Text}" Background="#2B2E34"
+                          BorderBrush="{StaticResource Line}" BorderThickness="1" Padding="8,5"
+                          SelectionChanged="GamePicker_SelectionChanged" ToolTip="Select a running game" />
+                <Button Grid.Column="1" Content="↻" Style="{StaticResource SmallButton}" Margin="5,0,0,0"
+                        Padding="0" FontSize="16" Click="RefreshGames_Click" ToolTip="Refresh running games" />
+                <Button Grid.Column="2" Content="Browse" Style="{StaticResource SmallButton}" Margin="5,0,0,0"
+                        Padding="7,7" Click="BrowseGame_Click" />
+                <Border Grid.Column="3" Background="#1D2024" BorderBrush="{StaticResource Line}"
+                        BorderThickness="1" CornerRadius="6" Margin="5,0,0,0" Padding="7,2">
+                    <DockPanel>
+                        <TextBlock Text="FPS" Foreground="{StaticResource Muted}" FontSize="9"
+                                   VerticalAlignment="Center" DockPanel.Dock="Right" Margin="5,0,0,0" />
+                        <TextBox x:Name="FpsInput" Text="120" Background="Transparent" BorderThickness="0"
+                                 Foreground="{StaticResource Text}" FontSize="14" FontWeight="SemiBold"
+                                 VerticalContentAlignment="Center" TextChanged="FpsInput_TextChanged" />
+                    </DockPanel>
+                </Border>
+                <Button Grid.Column="4" Content="Apply" Style="{StaticResource PrimaryButton}" Margin="5,0,0,0"
+                        Padding="8,7" Click="ApplyLimit_Click" />
+                <Button Grid.Column="5" Content="Clear cap" Style="{StaticResource SmallButton}" Margin="5,0,0,0"
+                        Padding="5,7" Click="RemoveLimit_Click" />
             </Grid>
         </Border>
 
-        <Grid Grid.Row="6">
-            <TextBlock Text="RTSS applies the limit. Choose a cap your game can sustain."
-                       FontSize="11" Foreground="{StaticResource Muted}" VerticalAlignment="Center" />
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                <Button Content="Remove cap" Style="{StaticResource QuietButton}" Click="RemoveLimit_Click" Margin="0,0,8,0" />
-                <Button Content="Apply limit" Style="{StaticResource PrimaryButton}" Click="ApplyLimit_Click" />
-            </StackPanel>
+        <TextBlock x:Name="SelectedGameStatus" Grid.Row="4" Text="Choose a running game or browse to its executable."
+                   FontSize="10" Foreground="{StaticResource Muted}" TextTrimming="CharacterEllipsis" />
+
+        <TextBlock x:Name="LiveMetricsText" Grid.Row="6" Text="FPS —   |   Frametime —   |   RTSS waiting"
+                   FontSize="12" FontWeight="SemiBold" Foreground="#D5D9DF" />
+
+        <Grid Grid.Row="8">
+            <TextBlock Text="FRAMETIME" FontSize="9" FontWeight="Bold" Foreground="{StaticResource Muted}" />
+            <TextBlock x:Name="TargetText" Text="Target —" FontSize="9" Foreground="{StaticResource Blue}"
+                       HorizontalAlignment="Right" />
         </Grid>
 
-        <TextBlock x:Name="StatusText" Grid.Row="7"
-                   Text="Ready. Select a game to configure its RTSS profile."
-                   FontSize="11" Foreground="{StaticResource Muted}" TextWrapping="Wrap"
-                   Margin="1,10,1,0" />
+        <Border Grid.Row="10" Background="#25282D" BorderBrush="{StaticResource Line}" BorderThickness="1"
+                CornerRadius="8" ClipToBounds="True">
+            <Grid>
+                <controls:FrametimeGraph x:Name="FrameGraph" ClipToBounds="True" />
+                <TextBlock x:Name="EmptyGraphLabel" Text="Start a game with RTSS to see frame times"
+                           FontSize="10" Foreground="#858B93" HorizontalAlignment="Center"
+                           VerticalAlignment="Center" IsHitTestVisible="False" />
+            </Grid>
+        </Border>
+
+        <TextBlock x:Name="StatusText" Grid.Row="12" Text="Ready"
+                   FontSize="10" Foreground="{StaticResource Muted}" TextTrimming="CharacterEllipsis" />
     </Grid>
 </Window>
