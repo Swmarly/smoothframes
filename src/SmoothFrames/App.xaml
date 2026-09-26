@@ -4,13 +4,13 @@
              xmlns:controls="clr-namespace:SmoothFrames.Controls"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
-        <SolidColorBrush x:Key="Canvas" Color="#1B1D21" />
+        <SolidColorBrush x:Key="Canvas" Color="#191C24" />
         <SolidColorBrush x:Key="Surface" Color="#24272C" />
         <SolidColorBrush x:Key="SurfaceHover" Color="#30343A" />
         <SolidColorBrush x:Key="Line" Color="#383C43" />
         <SolidColorBrush x:Key="Text" Color="#E9EDF2" />
         <SolidColorBrush x:Key="Muted" Color="#A1A8B1" />
-        <SolidColorBrush x:Key="Blue" Color="#75BFFF" />
+        <SolidColorBrush x:Key="Blue" Color="#91B7FF" />
         <SolidColorBrush x:Key="BlueDeep" Color="#367CB6" />
 
         <Style TargetType="TextBlock">
@@ -66,6 +66,61 @@
                             <Trigger Property="IsEnabled" Value="False">
                                 <Setter TargetName="Chrome" Property="Opacity" Value="0.55" />
                             </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style TargetType="ComboBoxItem">
+            <Setter Property="Foreground" Value="{StaticResource Text}"/>
+            <Setter Property="Padding" Value="10,7"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ComboBoxItem">
+                        <Border x:Name="Item" Background="Transparent" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsHighlighted" Value="True"><Setter TargetName="Item" Property="Background" Value="{StaticResource SurfaceHover}"/></Trigger>
+                            <Trigger Property="IsSelected" Value="True"><Setter TargetName="Item" Property="Background" Value="#34435C"/></Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style TargetType="ComboBox">
+            <Setter Property="Foreground" Value="{StaticResource Text}"/>
+            <Setter Property="Background" Value="{StaticResource Surface}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource Line}"/>
+            <Setter Property="ScrollViewer.CanContentScroll" Value="True"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ComboBox">
+                        <Grid>
+                            <ToggleButton Focusable="False" IsChecked="{Binding IsDropDownOpen, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}" ClickMode="Press">
+                                <ToggleButton.Template>
+                                    <ControlTemplate TargetType="ToggleButton">
+                                        <Border x:Name="Field" Background="{StaticResource Surface}" BorderBrush="{StaticResource Line}" BorderThickness="1" CornerRadius="6">
+                                            <TextBlock Text="⌄" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,12,0"/>
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Field" Property="Background" Value="{StaticResource SurfaceHover}"/></Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </ToggleButton.Template>
+                            </ToggleButton>
+                            <TextBlock x:Name="Placeholder" Text="Choose a game…" Margin="10,0,30,0" VerticalAlignment="Center" Foreground="{StaticResource Muted}" IsHitTestVisible="False" Visibility="Collapsed"/>
+                            <ContentPresenter Margin="10,0,30,0" VerticalAlignment="Center" IsHitTestVisible="False" Content="{TemplateBinding SelectionBoxItem}" ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"/>
+                            <Popup x:Name="PART_Popup" Placement="Bottom" IsOpen="{TemplateBinding IsDropDownOpen}" AllowsTransparency="True" Focusable="False" PopupAnimation="None">
+                                <Border Background="{StaticResource Surface}" BorderBrush="{StaticResource Line}" BorderThickness="1" MinWidth="{Binding ActualWidth, RelativeSource={RelativeSource TemplatedParent}}">
+                                    <ScrollViewer MaxHeight="280"><ItemsPresenter KeyboardNavigation.DirectionalNavigation="Contained"/></ScrollViewer>
+                                </Border>
+                            </Popup>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="SelectedIndex" Value="-1"><Setter TargetName="Placeholder" Property="Visibility" Value="Visible"/></Trigger>
+                            <Trigger Property="IsEnabled" Value="False"><Setter Property="Opacity" Value="0.55"/></Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
