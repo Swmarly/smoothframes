@@ -41,7 +41,7 @@ The app project deliberately fails a direct build when native artifacts are abse
 
 ## Validation
 
-Windows CI builds x64 and x86 and runs an actual Direct3D 11 fixture for each: process identity checking, helper injection, shared-memory handshake, 30/60 FPS pacing, pause, stale-heartbeat handling and recovery. It also verifies the engines embedded in the published executable. This does not replace testing D3D9, OpenGL, DX12, overlays, fullscreen transitions, or anti-cheat policies in actual games.
+Windows CI builds x64 and x86 and runs an actual Direct3D 11 fixture for each: process identity checking, helper injection, shared-memory handshake, 30/60 FPS pacing, pause, stale-heartbeat handling and recovery. It also verifies the engines embedded in the published executable and opens/closes the actual UI, capturing its minimum-size layout. This does not replace testing D3D9, OpenGL, DX12, overlays, fullscreen transitions, or anti-cheat policies in actual games.
 
 ## License
 

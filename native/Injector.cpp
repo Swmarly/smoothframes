@@ -3,6 +3,7 @@
 #include <iostream>
 #include <string>
 #include <cwchar>
+#include <cstdint>
 
 struct Handle {
     HANDLE value;

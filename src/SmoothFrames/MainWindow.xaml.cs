@@ -45,6 +45,25 @@ public partial class MainWindow : Window
         if (_profiles.LoadWarning is not null) StatusText.Text = _profiles.LoadWarning;
         _timer.Tick += Tick;
         _timer.Start();
+        if (Environment.GetCommandLineArgs().Contains("--smoke-ui"))
+        {
+            var smoke = new DispatcherTimer { Interval = TimeSpan.FromSeconds(2) };
+            smoke.Tick += (_, _) =>
+            {
+                smoke.Stop();
+                Width = MinWidth; Height = MinHeight; UpdateLayout();
+                var visual = (FrameworkElement)Content;
+                var bitmap = new System.Windows.Media.Imaging.RenderTargetBitmap((int)visual.ActualWidth,
+                    (int)visual.ActualHeight, 96, 96, PixelFormats.Pbgra32);
+                bitmap.Render(visual);
+                var encoder = new System.Windows.Media.Imaging.PngBitmapEncoder();
+                encoder.Frames.Add(System.Windows.Media.Imaging.BitmapFrame.Create(bitmap));
+                Directory.CreateDirectory("artifacts");
+                using (var file = File.Create("artifacts/ui-smoke.png")) encoder.Save(file);
+                Close();
+            };
+            smoke.Start();
+        }
     }
     private void Window_Closed(object? sender, EventArgs e)
     {

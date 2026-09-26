@@ -15,7 +15,12 @@ static LONG previousCap{};
 static thread_local int nesting{};
 
 static void Pace(void* stream, LONG api) {
-    if (!shared || !sf::Alive(shared) || !TryAcquireSRWLockExclusive(&pacingLock)) return;
+    if (!shared || !TryAcquireSRWLockExclusive(&pacingLock)) return;
+    if (!sf::Alive(shared)) {
+        deadline = lastFrame = 0;
+        ReleaseSRWLockExclusive(&pacingLock);
+        return;
+    }
     const auto before = sf::Now();
     // Ignore secondary swapchains instead of making their render threads wait for each other.
     if (activeStream != stream) {

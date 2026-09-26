@@ -20,12 +20,22 @@ static int Render() {
     if (FAILED(hr)) hr = D3D11CreateDeviceAndSwapChain(nullptr, D3D_DRIVER_TYPE_WARP, nullptr, 0, nullptr, 0,
         D3D11_SDK_VERSION, &desc, &chain, &device, nullptr, &context);
     if (FAILED(hr)) return 3;
+    const auto name = sf::MappingName(GetCurrentProcessId());
+    HANDLE mapping{};
+    sf::Shared* control{};
     const auto start = GetTickCount();
     while (GetTickCount() - start < 35000) {
         MSG msg{};
         while (PeekMessageW(&msg, nullptr, 0, 0, PM_REMOVE)) { TranslateMessage(&msg); DispatchMessageW(&msg); }
+        if (!control) {
+            mapping = OpenFileMappingW(FILE_MAP_ALL_ACCESS, FALSE, name.c_str());
+            if (mapping) control = static_cast<sf::Shared*>(MapViewOfFile(mapping, FILE_MAP_ALL_ACCESS, 0, 0, sizeof(sf::Shared)));
+        }
+        if (control) InterlockedIncrement(&control->reserved); // Independent fixture frame counter.
         chain->Present(0, 0);
     }
+    if (control) UnmapViewOfFile(control);
+    if (mapping) CloseHandle(mapping);
     context->Release(); device->Release(); chain->Release(); DestroyWindow(window);
     return 0;
 }
@@ -92,13 +102,17 @@ int wmain(int argc, wchar_t**) {
         // Simulate a controller crash while 30 FPS is requested. Telemetry also stops on expiry.
         Rate(shared, 3000, false);
         const auto stale = static_cast<uint32_t>(sf::Read(&shared->sequence));
-        Sleep(200);
+        const auto renderStart = static_cast<uint32_t>(sf::Read(&shared->reserved));
+        const auto clockStart = GetTickCount();
+        Sleep(500);
+        const auto failOpenRate = static_cast<uint32_t>(sf::Read(&shared->reserved) - renderStart) * 1000.0 / (GetTickCount() - clockStart);
+        Check(failOpenRate > high * 1.3, "Controller loss did not remove the cap");
         Check(static_cast<uint32_t>(sf::Read(&shared->sequence)) == stale, "Stale controller was not ignored");
         // Resume heartbeat with cap disabled; capture recovers without re-injecting.
         InterlockedExchange(&shared->targetMilliFps, 0);
         Rate(shared, 200);
         const auto recovered = Rate(shared, 1000);
-        std::cout << "30 cap: " << low << "; 60 cap: " << high << "; disabled: " << uncapped << "; recovered: " << recovered << '\n';
+        std::cout << "30 cap: " << low << "; 60 cap: " << high << "; disabled: " << uncapped << "; controller lost: " << failOpenRate << "; recovered: " << recovered << '\n';
         Check(low >= 22 && low <= 38, "30 FPS pacing outside tolerance");
         Check(high >= 44 && high <= 75 && high > low * 1.4, "60 FPS pacing outside tolerance");
         Check(uncapped > high * 1.3 && recovered > high * 1.3, "Disable/recovery did not remove cap");

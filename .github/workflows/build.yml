@@ -1,7 +1,7 @@
 name: Build
 on:
   push:
-    branches: [main, 'codex/**']
+    branches: [main]
   pull_request:
     branches: [main]
   workflow_dispatch:
@@ -26,4 +26,9 @@ jobs:
         with:
           name: SmoothFrames-win-x64
           path: artifacts/SmoothFrames-win-x64.zip
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        with:
+          name: SmoothFrames-ui-smoke
+          path: artifacts/ui-smoke.png
           if-no-files-found: error

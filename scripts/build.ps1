@@ -9,7 +9,7 @@ foreach ($target in @(@{Name='x64'; Generator='x64'}, @{Name='x86'; Generator='W
     $build = "artifacts/build-$($target.Name)"
     Run -Program cmake -Arguments @('-S', 'native', '-B', $build, '-A', $target.Generator)
     Run -Program cmake -Arguments @('--build', $build, '--config', 'Release', '--parallel')
-    if (!$SkipTests) { Run -Program ctest -Arguments @('--test-dir', $build, '-C', 'Release', '--output-on-failure') }
+    if (!$SkipTests) { Run -Program ctest -Arguments @('--test-dir', $build, '-C', 'Release', '--output-on-failure', '--verbose') }
     Run -Program cmake -Arguments @('--install', $build, '--config', 'Release', '--prefix', "artifacts/native/$($target.Name)")
 }
 Run -Program dotnet -Arguments @('publish', 'src/SmoothFrames/SmoothFrames.csproj', '-c', 'Release', '-r', 'win-x64', '--self-contained', 'true',
@@ -20,4 +20,9 @@ Copy-Item README.md artifacts/publish/README.md
 # This executes the embedded helpers extraction from the actual self-contained EXE.
 $verify = Start-Process artifacts/publish/SmoothFrames.exe -ArgumentList '--verify-engine' -Wait -PassThru
 if ($verify.ExitCode -ne 0) { throw 'Packaged engine verification failed' }
+if (!$SkipTests) {
+    $ui = Start-Process artifacts/publish/SmoothFrames.exe -ArgumentList '--smoke-ui' -PassThru
+    if (!$ui.WaitForExit(15000)) { $ui.Kill(); throw 'UI startup smoke test timed out' }
+    if ($ui.ExitCode -ne 0) { throw 'UI startup smoke test failed' }
+}
 Compress-Archive -Path artifacts/publish/* -DestinationPath artifacts/SmoothFrames-win-x64.zip -Force
