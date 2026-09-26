@@ -47,15 +47,22 @@ public partial class MainWindow : Window
         _timer.Start();
         if (Environment.GetCommandLineArgs().Contains("--smoke-ui"))
         {
+            Width = MinWidth; Height = MinHeight;
             var smoke = new DispatcherTimer { Interval = TimeSpan.FromSeconds(2) };
             smoke.Tick += (_, _) =>
             {
                 smoke.Stop();
-                Width = MinWidth; Height = MinHeight; UpdateLayout();
                 var visual = (FrameworkElement)Content;
                 var bitmap = new System.Windows.Media.Imaging.RenderTargetBitmap((int)visual.ActualWidth,
                     (int)visual.ActualHeight, 96, 96, PixelFormats.Pbgra32);
-                bitmap.Render(visual);
+                var capture = new DrawingVisual();
+                using (var drawing = capture.RenderOpen())
+                {
+                    var bounds = new Rect(0, 0, visual.ActualWidth, visual.ActualHeight);
+                    drawing.DrawRectangle(Background, null, bounds);
+                    drawing.DrawRectangle(new VisualBrush(visual), null, bounds);
+                }
+                bitmap.Render(capture);
                 var encoder = new System.Windows.Media.Imaging.PngBitmapEncoder();
                 encoder.Frames.Add(System.Windows.Media.Imaging.BitmapFrame.Create(bitmap));
                 Directory.CreateDirectory("artifacts");
